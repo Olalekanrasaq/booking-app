@@ -14,7 +14,9 @@ st.markdown("---")
 
 st.sidebar.header("TGA Booking")
 
-selection = st.sidebar.radio("Request", ["Booking Calendar", "Book Apartment", "Check Previous Booking"])
+selection = st.sidebar.radio("Request", 
+                             ["Booking Calendar", "Book Apartment", 
+                              "Check Previous Booking", "Download booking data"])
 
 if selection == "Booking Calendar":
     st.info("Dates colored red have been booked")
@@ -150,3 +152,8 @@ elif selection == "Check Previous Booking":
     df = pd.DataFrame(bookings)
     
     st.table(df)
+
+elif selection == "Download booking data":
+    with open(db_file, "r") as file:
+        json_data = file.read()
+    st.download_button("Download Booking Data", json_data, "bookings.json")
