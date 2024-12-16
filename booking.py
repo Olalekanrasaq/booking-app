@@ -3,8 +3,14 @@ from datetime import datetime, timedelta
 import json
 import pandas as pd
 import streamlit.components.v1
+import base64
 
 db_file = "bookings.json"
+image_folder = "uploaded_images"
+
+def get_base64_encoded_image(image_path):
+    with open(image_path, "rb") as img_file:
+        return base64.b64encode(img_file.read()).decode("utf-8")
 
 with open(db_file, "r") as file:
     bookings = json.load(file)
@@ -96,7 +102,9 @@ if selection == "Booking Calendar":
             # Display the result as a table
             if records:
                 df = pd.DataFrame(records)
-                st.table(df)
+                # Render the table with images
+                st.markdown(df.to_html(escape=False, index=False), unsafe_allow_html=True)
+                #st.table(df)
 
 
 elif selection == "Book Apartment":
@@ -109,6 +117,7 @@ elif selection == "Book Apartment":
                              ["Upper floor", "Middle floor", "Ground floor"])
     check_in = st.date_input("Check-In date")
     check_out = st.date_input("Check-Out date")
+    upload_image = st.file_uploader("Upload ID card", type=["JPG", "JPEG", "PNG"])
 
     submit = st.button("Book")
 
@@ -129,6 +138,17 @@ elif selection == "Book Apartment":
             st.error("This apartment is already booked for the selected dates. Please choose different dates.")
         else:
             # No overlap, proceed with booking
+
+            # Save the uploaded image locally
+            timestamp = datetime.now().strftime("%Y%m%d")
+            image_filename = f"{name.replace(' ', '_')}_{timestamp}.jpg"
+
+            with open(image_filename, "wb") as f:
+                f.write(upload_image.getbuffer())
+            
+            image_html = f'<img src="data:image/jpeg;base64,{get_base64_encoded_image(image_filename)}" width="100" />'
+
+            
             book_dict = {
                 "name": name.title(),
                 "address": address,
@@ -137,21 +157,25 @@ elif selection == "Book Apartment":
                 "apartment": apartment,
                 "check_in": check_in.isoformat(),
                 "check_out": check_out.isoformat(),
-                "days": (check_out - check_in).days
+                "days": (check_out - check_in).days,
+                "client_id": image_html
             }
+
             bookings.append(book_dict)
-            st.success("Room has been booked successfully!!")
             
             # Save bookings to the database file
             with open(db_file, "w") as file:
                 json.dump(bookings, file, indent=4)
 
+            st.success("Room has been booked successfully!!")
     
 elif selection == "Check Previous Booking":
     st.subheader("Previous Booking")
     df = pd.DataFrame(bookings)
+    # Render the table with images
+    st.markdown(df.to_html(escape=False, index=False), unsafe_allow_html=True)
     
-    st.table(df)
+    #st.table(df)
 
 elif selection == "Download booking data":
     with open(db_file, "r") as file:
