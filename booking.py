@@ -8,12 +8,6 @@ import base64
 db_file = "bookings.json"
 #image_folder = "uploaded_images"
 
-"""
-def get_base64_encoded_image(image_path):
-    with open(image_path, "rb") as img_file:
-        return base64.b64encode(img_file.read()).decode("utf-8")
-"""
-
 with open(db_file, "r") as file:
     bookings = json.load(file)
 
@@ -143,13 +137,7 @@ elif selection == "Book Apartment":
 
             # Save the uploaded image locally
             timestamp = datetime.now().strftime("%Y%m%d")
-            #image_filename = f"{name.replace(' ', '_')}_{timestamp}.jpg"
-
-            """
-            with open(image_filename, "wb") as f:
-                f.write(upload_image.getbuffer())
-            """
-            
+            #image_filename = f"{name.replace(' ', '_')}_{timestamp}.jpg"            
             #image_html = f'<img src="data:image/jpeg;base64,{get_base64_encoded_image(image_filename)}" width="100" />'
 
             
